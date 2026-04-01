@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XTimeLater — Time Card Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700;900&display=swap');
+
+  @font-face {
+    font-family: "Some Time Later";
+    src: url("https://github.com/ctrlcctrlv/some-time-later/raw/master/Some%20Time%20Later.woff2") format("woff2"),
+         url("https://github.com/ctrlcctrlv/some-time-later/raw/master/Some%20Time%20Later.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+  }
+  :root {
+    --bg:#f5f5f5;--white:#ffffff;--black:#111111;
+    --gray-100:#f0f0f0;--gray-200:#e0e0e0;--gray-400:#999999;--gray-600:#555555;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--black);min-height:100vh;}
+  nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;}
+  .logo{font-size:1.2rem;font-weight:900;letter-spacing:-0.5px;}
+  .logo span{color:var(--gray-400);font-weight:400;}
+  .badge{font-size:.72rem;font-weight:600;color:var(--gray-600);background:var(--gray-100);padding:.25rem .75rem;border-radius:100px;text-transform:uppercase;letter-spacing:.8px;}
+  .hero{background:var(--white);border-bottom:1px solid var(--gray-200);padding:3.5rem 2rem 3rem;text-align:center;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
+  .hero-title{display:flex;align-items:baseline;justify-content:center;font-size:clamp(2rem,5vw,3.6rem);font-weight:900;letter-spacing:-2px;line-height:1.15;white-space:nowrap;width:100%;}
+  .slot-window{display:inline-block;overflow:hidden;height:1.15em;vertical-align:bottom;position:relative;padding-right:0.15em;}
+  .slot-window::before,.slot-window::after{content:'';position:absolute;left:0;right:0;height:30%;z-index:2;pointer-events:none;}
+  .slot-window::before{top:0;background:linear-gradient(to bottom,var(--white),transparent);}
+  .slot-window::after{bottom:0;background:linear-gradient(to top,var(--white),transparent);}
+  .slot-track{display:flex;flex-direction:column;align-items:flex-end;will-change:transform;}
+  .slot-item{height:1.15em;line-height:1.15em;white-space:nowrap;color:var(--gray-400);text-align:right;}
+  .slot-item.final{color:var(--black);}
+  .word-later{display:inline-block;}
+  .hero p{margin-top:.9rem;color:var(--gray-600);font-size:1rem;opacity:0;animation:fadeUp .6s ease forwards;animation-delay:4s;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .wrap{max-width:1120px;margin:2rem auto;padding:0 1.5rem;display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:start;}
+  @media(max-width:800px){.wrap{grid-template-columns:1fr;}}
+  .card{background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);padding:1.6rem;}
+  .card-label{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);margin-bottom:1.4rem;}
+  .field{margin-bottom:1.4rem;}
+  .field-label{display:block;font-size:.8rem;font-weight:600;margin-bottom:.45rem;}
+  textarea{width:100%;padding:.7rem .9rem;border:1.5px solid var(--gray-200);border-radius:8px;font-family:'Inter',sans-serif;font-size:.93rem;resize:vertical;min-height:76px;outline:none;transition:border-color .15s;color:var(--black);background:var(--white);}
+  textarea:focus{border-color:var(--black);}
+  .swatch-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  input[type="color"]{width:34px;height:34px;border:1.5px solid var(--gray-200);border-radius:7px;padding:2px;cursor:pointer;background:none;}
+  .sw{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .1s,border-color .1s;flex-shrink:0;}
+  .sw:hover{transform:scale(1.18);}
+  .sw.on{border-color:var(--black);}
+  .theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+  .th{aspect-ratio:1;border-radius:8px;border:2px solid transparent;cursor:pointer;position:relative;overflow:hidden;transition:transform .1s,border-color .1s;}
+  .th:hover{transform:scale(1.07);}
+  .th.on{border-color:var(--black);}
+  .th em{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-style:normal;font-size:.46rem;font-weight:600;color:rgba(255,255,255,.92);text-shadow:0 1px 3px rgba(0,0,0,.7);}
+  .fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .fmt{background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:8px;padding:.5rem .3rem;text-align:center;cursor:pointer;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:500;color:var(--gray-600);line-height:1.5;transition:all .12s;}
+  .fmt b{display:block;font-size:.92rem;font-weight:800;color:var(--black);letter-spacing:-.3px;}
+  .fmt:hover{border-color:var(--black);background:var(--white);}
+  .fmt.on{background:var(--black);border-color:var(--black);color:#ccc;}
+  .fmt.on b{color:#fff;}
+  .btn-main{width:100%;margin-top:1.5rem;padding:.9rem;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:opacity .15s;}
+  .btn-main:hover{opacity:.82;}
+  .btn-main:disabled{opacity:.35;cursor:not-allowed;}
+  .preview-side{display:flex;flex-direction:column;gap:1rem;position:sticky;top:1.5rem;}
+  .canvas-box{background:var(--gray-100);border:1px solid var(--gray-200);border-radius:var(--radius);min-height:260px;display:flex;align-items:center;justify-content:center;padding:1.2rem;}
+  #cv{max-width:100%;max-height:420px;display:block;border-radius:6px;box-shadow:0 6px 24px rgba(0,0,0,.1);}
+  #msg{font-size:.8rem;font-weight:500;color:var(--gray-400);text-align:center;min-height:1.1rem;}
+  #msg.w{color:#d97706;}#msg.ok{color:#16a34a;}#msg.err{color:#dc2626;}
+  .act-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-out{padding:.72rem;border-radius:8px;border:1.5px solid var(--gray-200);background:var(--white);color:var(--black);font-family:'Inter',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:border-color .12s;}
+  .btn-out:hover{border-color:var(--black);}
+  .btn-out:disabled{opacity:.35;cursor:not-allowed;}
+  .btn-dl{background:var(--black);color:#fff;border-color:var(--black);}
+  .btn-dl:hover{opacity:.82;border-color:var(--black);}
+  footer{margin-top:4rem;padding:2rem;text-align:center;font-size:.75rem;color:var(--gray-400);border-top:1px solid var(--gray-200);background:var(--white);}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">XTimeLater<span>.com</span></div>
+  <div class="badge">Free Tool</div>
+</nav>
+<div class="hero">
+  <div class="hero-title">
+    <div class="slot-window" id="slotWindow"><div class="slot-track" id="slotTrack"></div></div>
+    <span class="word-later">Later...</span>
+  </div>
+  <p>Type anything. Pick a style. Download your video.</p>
+</div>
+<div class="wrap">
+  <div class="card">
+    <div class="card-label">Customize</div>
+    <div class="field">
+      <span class="field-label">Text</span>
+      <textarea id="txt" placeholder="1000 Years Later...">1000 Years Later...</textarea>
+    </div>
+    <div class="field">
+      <span class="field-label">Text Color</span>
+      <div class="swatch-row">
+        <input type="color" id="col" value="#ffffff">
+        <div class="sw on" style="background:#fff;border-color:#ddd" data-c="#ffffff"></div>
+        <div class="sw" style="background:#111" data-c="#111111"></div>
+        <div class="sw" style="background:#f5c518" data-c="#f5c518"></div>
+        <div class="sw" style="background:#ff6b35" data-c="#ff6b35"></div>
+        <div class="sw" style="background:#60a5fa" data-c="#60a5fa"></div>
+        <div class="sw" style="background:#4ade80" data-c="#4ade80"></div>
+        <div class="sw" style="background:#f472b6" data-c="#f472b6"></div>
+      </div>
+    </div>
+    <div class="field">
+      <span class="field-label">Background</span>
+      <div class="theme-grid" id="tg"></div>
+    </div>
+    <div class="field">
+      <span class="field-label">Video Format</span>
+      <div class="fmt-grid">
+        <button class="fmt on" data-w="1920" data-h="1080"><b>16:9</b>YouTube</button>
+        <button class="fmt" data-w="1080" data-h="1920"><b>9:16</b>TikTok</button>
+        <button class="fmt" data-w="1080" data-h="1080"><b>1:1</b>Instagram</button>
+        <button class="fmt" data-w="1080" data-h="810"><b>4:3</b>Classic</button>
+        <button class="fmt" data-w="810" data-h="1080"><b>3:4</b>Portrait</button>
+        <button class="fmt" data-w="1280" data-h="720"><b>16:9</b>Twitter/X</button>
+      </div>
+    </div>
+    <button class="btn-main" id="genBtn" onclick="gen()">Generate Video</button>
+  </div>
+  <div class="preview-side">
+    <div class="card">
+      <div class="card-label">Preview</div>
+      <div class="canvas-box"><canvas id="cv"></canvas></div>
+    </div>
+    <div id="msg">Customize your card above</div>
+    <div class="act-row">
+      <button class="btn-out" onclick="playTTS()">▶ Play Audio</button>
+      <button class="btn-out btn-dl" id="dlBtn" disabled onclick="dl()">↓ Download</button>
+    </div>
+  </div>
+</div>
+<footer>XTimeLater — Not affiliated with Nickelodeon or Viacom</footer>
+<script>
+// SLOT
+const ITEMS=['One Eternity','1 Minute','5 Days','3 Rounds','1 Year','100 Years','1000 Years','One Eternity','5 Seconds','2 Weeks','X Times'];
+const track=document.getElementById('slotTrack');
+const win=document.getElementById('slotWindow');
+function buildSlot(){
+  track.innerHTML='';
+  ITEMS.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className='slot-item'+(i===ITEMS.length-1?' final':'');
+    el.textContent=t;
+    track.appendChild(el);
+  });
+  requestAnimationFrame(()=>{
+    const itemH=track.firstChild.getBoundingClientRect().height;
+    win.style.height=itemH+'px';
+    let maxW=0;
+    const items=[...track.querySelectorAll('.slot-item')];
+    items.forEach(el=>{maxW=Math.max(maxW,el.getBoundingClientRect().width);});
+    const slotW=maxW*1.08+20;
+    win.style.width=slotW+'px';
+    track.style.transition='none';
+    track.style.transform='translateY(0)';
+
+    // nudge title left by half the difference between slot width and final item width
+    const finalW = items[items.length-1].getBoundingClientRect().width;
+    const extra = (slotW - finalW) / 2;
+    document.querySelector('.hero-title').style.transform = `translateX(-${extra}px)`;
+
+    setTimeout(()=>runSlot(itemH),800);
+  });
+}
+function runSlot(itemH){
+  const schedule=[
+    {index:1,delay:100},{index:2,delay:100},{index:3,delay:100},
+    {index:4,delay:100},{index:5,delay:100},{index:6,delay:100},
+    {index:7,delay:100},{index:8,delay:180},{index:9,delay:320},
+    {index:10,delay:600}
+  ];
+  let elapsed=0;
+  schedule.forEach((step,i)=>{
+    elapsed+=step.delay;
+    setTimeout(()=>{
+      const offset=-(step.index*itemH);
+      const easing=i<7?'cubic-bezier(0.4,0,0.6,1)':i===7?'cubic-bezier(0.4,0,0.2,1)':i===8?'cubic-bezier(0.2,0,0.1,1)':'cubic-bezier(0.12,0,0.02,1)';
+      track.style.transition=`transform ${step.delay*0.92}ms ${easing}`;
+      track.style.transform=`translateY(${offset}px)`;
+    },elapsed);
+  });
+}
+document.fonts.ready.then(buildSlot);
+
+// THEMES
+const THEMES=[
+  {name:'Classic',c:['#d4a017','#c8960f','#e8b84b','#b8860b']},
+  {name:'Ocean',c:['#1565c0','#0d47a1','#1976d2','#0a2f6e']},
+  {name:'Purple',c:['#6a1b9a','#4a148c','#7b1fa2','#38006b']},
+  {name:'Green',c:['#2e7d32','#1b5e20','#388e3c','#1a4a1e']},
+  {name:'Coral',c:['#e64a19','#bf360c','#f4511e','#8b2000']},
+  {name:'Pink',c:['#c2185b','#880e4f','#d81b60','#6a0035']},
+  {name:'Teal',c:['#00695c','#004d40','#00796b','#00332c']},
+  {name:'Dark',c:['#212121','#161616','#2c2c2c','#0a0a0a']},
+  {name:'Sand',c:['#f9a825','#f57f17','#fbc02d','#e65100']},
+  {name:'Sky',c:['#0288d1','#01579b','#039be5','#003c6e']},
+];
+let ti=0,W=1920,H=1080,blob=null;
+const tg=document.getElementById('tg');
+THEMES.forEach((t,i)=>{
+  const el=document.createElement('div');
+  el.className='th'+(i===0?' on':'');
+  el.style.background=`linear-gradient(135deg,${t.c[0]},${t.c[1]})`;
+  el.innerHTML=`<em>${t.name}</em>`;
+  el.onclick=()=>{document.querySelectorAll('.th').forEach(x=>x.classList.remove('on'));el.classList.add('on');ti=i;redraw();};
+  tg.appendChild(el);
+});
+document.querySelectorAll('.fmt').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.fmt').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');W=+b.dataset.w;H=+b.dataset.h;redraw();
+}));
+document.querySelectorAll('.sw').forEach(s=>s.addEventListener('click',()=>{
+  document.querySelectorAll('.sw').forEach(x=>x.classList.remove('on'));
+  s.classList.add('on');document.getElementById('col').value=s.dataset.c;redraw();
+}));
+document.getElementById('col').addEventListener('input',redraw);
+document.getElementById('txt').addEventListener('input',redraw);
+
+function tiles(ctx,w,h,colors){
+  const ts=Math.floor(Math.min(w,h)/10);
+  for(let r=0;r<=Math.ceil(h/ts);r++)
+    for(let c=0;c<=Math.ceil(w/ts);c++){
+      ctx.fillStyle=colors[(r+c)%colors.length];
+      ctx.fillRect(c*ts,r*ts,ts-2,ts-2);
+      ctx.fillStyle='rgba(255,255,255,0.05)';
+      ctx.fillRect(c*ts+4,r*ts+4,ts-12,ts-12);
+    }
+}
+
+// FIXED: smart text fitting - shrinks font until everything fits
+function fitText(ctx, text, maxW, maxH) {
+  const words = text.split(' ');
+  let fs = Math.floor(maxH / 3.5); // start size
+  const minFs = Math.floor(maxH / 14); // minimum font size
+
+  while (fs >= minFs) {
+    ctx.font = `bold ${fs}px Bangers, cursive`;
+    // wrap words
+    const lines = [];
+    let cur = '';
+    words.forEach(w => {
+      const test = cur ? cur + ' ' + w : w;
+      if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
+      else cur = test;
+    });
+    if (cur) lines.push(cur);
+
+    // check if all lines fit within maxW and total height fits
+    const lh = fs * 1.25;
+    const totalH = lines.length * lh;
+    const allFit = lines.every(l => ctx.measureText(l).width <= maxW);
+
+    if (allFit && totalH <= maxH) {
+      return { lines, fs, lh };
+    }
+    fs -= 2;
+  }
+  // fallback: just return with min size
+  ctx.font = `bold ${minFs}px Bangers, cursive`;
+  const lines = [text];
+  return { lines, fs: minFs, lh: minFs * 1.25 };
+}
+
+function paint(canvas,w,h){
+  canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext('2d');
+  tiles(ctx,w,h,THEMES[ti].c);
+
+  const text=document.getElementById('txt').value||'X Time Later...';
+  const color=document.getElementById('col').value;
+
+  const padX = w * 0.1;
+  const padY = h * 0.12;
+  const maxW = w - padX * 2;
+  const maxH = h - padY * 2;
+
+  const {lines, fs, lh} = fitText(ctx, text, maxW, maxH);
+
+  const totalH = lines.length * lh;
+  const startY = (h - totalH) / 2 + lh * 0.75;
+
+  ctx.textAlign='center';
+  ctx.textBaseline='alphabetic';
+  ctx.font=`bold ${fs}px "Some Time Later", Bangers, cursive`;
+
+  lines.forEach((l,i)=>{
+    const y=startY+i*lh;
+    ctx.lineWidth=fs*0.09;
+    ctx.strokeStyle='rgba(0,0,0,0.9)';
+    ctx.lineJoin='round';
+    ctx.strokeText(l,w/2,y);
+    ctx.fillStyle=color;
+    ctx.fillText(l,w/2,y);
+  });
+}
+
+function redraw(){
+  paint(document.getElementById('cv'),W,H);
+  blob=null;document.getElementById('dlBtn').disabled=true;
+}
+
+function playTTS(){
+  const text=document.getElementById('txt').value;if(!text)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.82;u.pitch=0.85;
+  const v=speechSynthesis.getVoices().find(x=>/daniel|alex|male|fred/i.test(x.name));
+  if(v)u.voice=v;
+  speechSynthesis.speak(u);
+}
+
+async function gen(){
+  const text=document.getElementById('txt').value;
+  if(!text.trim()){setMsg('Please enter some text.','err');return;}
+  setMsg('Generating video...','w');
+  document.getElementById('genBtn').disabled=true;
+  try{
+    const off=document.createElement('canvas');
+    paint(off,W,H);
+    const dur=Math.max(3000,text.length*80);
+    const cs=off.captureStream(30);
+    const ac=new(window.AudioContext||window.webkitAudioContext)();
+    const dest=ac.createMediaStreamDestination();
+    const stream=new MediaStream([...cs.getVideoTracks(),...dest.stream.getAudioTracks()]);
+    const mime=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||'';
+    const rec=new MediaRecorder(stream,{mimeType:mime});
+    const chunks=[];
+    rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data);};
+    rec.onstop=()=>{
+      blob=new Blob(chunks,{type:rec.mimeType});
+      setMsg('Ready to download.','ok');
+      document.getElementById('dlBtn').disabled=false;
+      document.getElementById('genBtn').disabled=false;
+    };
+    rec.start();
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.rate=0.82;u.pitch=0.85;
+    const v=speechSynthesis.getVoices().find(x=>/daniel|alex|male|fred/i.test(x.name));
+    if(v)u.voice=v;
+    speechSynthesis.speak(u);
+    setTimeout(()=>{rec.stop();speechSynthesis.cancel();},dur);
+  }catch(e){
+    setMsg('Error: '+e.message,'err');
+    document.getElementById('genBtn').disabled=false;
+  }
+}
+
+function dl(){
+  if(!blob)return;
+  const ext=blob.type.includes('mp4')?'mp4':'webm';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`xtimelater_${W}x${H}.${ext}`;
+  a.click();
+}
+
+function setMsg(m,t=''){const el=document.getElementById('msg');el.textContent=m;el.className=t;}
+
+speechSynthesis.onvoiceschanged=redraw;
+redraw();
+</script>
+</body>
+</html>
