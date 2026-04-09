@@ -3,20 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XTimeLater — Time Card Generator</title>
+<title>XTimesLater — Time Card Generator</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700;900&display=swap');
-
-  @font-face {
-    font-family: "Some Time Later";
-    src: url("Some Time Later.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-  }
-  :root {
-    --bg:#f5f5f5;--white:#ffffff;--black:#111111;
-    --gray-100:#f0f0f0;--gray-200:#e0e0e0;--gray-400:#999999;--gray-600:#555555;--radius:12px;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+  @font-face{font-family:"Some Time Later";src:url("Some Time Later.otf") format("opentype");}
+  :root{--bg:#f5f5f5;--white:#fff;--black:#111;--gray-100:#f0f0f0;--gray-200:#e0e0e0;--gray-400:#999;--gray-600:#555;--radius:12px;}
   *{box-sizing:border-box;margin:0;padding:0;}
   body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--black);min-height:100vh;}
   nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;}
@@ -25,14 +16,13 @@
   .badge{font-size:.72rem;font-weight:600;color:var(--gray-600);background:var(--gray-100);padding:.25rem .75rem;border-radius:100px;text-transform:uppercase;letter-spacing:.8px;}
   .hero{background:var(--white);border-bottom:1px solid var(--gray-200);padding:3.5rem 2rem 3rem;text-align:center;overflow:hidden;display:flex;flex-direction:column;align-items:center;}
   .hero-title{display:flex;align-items:baseline;justify-content:center;font-size:clamp(2rem,5vw,3.6rem);font-weight:900;letter-spacing:-2px;line-height:1.15;white-space:nowrap;width:100%;}
-  .slot-window{display:inline-block;overflow:hidden;height:1.15em;vertical-align:bottom;position:relative;padding-right:0.15em;}
+  .slot-window{display:inline-block;overflow:hidden;height:1.15em;vertical-align:bottom;position:relative;padding-right:.15em;}
   .slot-window::before,.slot-window::after{content:'';position:absolute;left:0;right:0;height:30%;z-index:2;pointer-events:none;}
   .slot-window::before{top:0;background:linear-gradient(to bottom,var(--white),transparent);}
   .slot-window::after{bottom:0;background:linear-gradient(to top,var(--white),transparent);}
   .slot-track{display:flex;flex-direction:column;align-items:flex-end;will-change:transform;}
   .slot-item{height:1.15em;line-height:1.15em;white-space:nowrap;color:var(--gray-400);text-align:right;}
   .slot-item.final{color:var(--black);}
-  .word-later{display:inline-block;}
   .hero p{margin-top:.9rem;color:var(--gray-600);font-size:1rem;opacity:0;animation:fadeUp .6s ease forwards;animation-delay:4s;}
   @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
   .wrap{max-width:1120px;margin:2rem auto;padding:0 1.5rem;display:grid;grid-template-columns:360px 1fr;gap:1.5rem;align-items:start;}
@@ -48,17 +38,24 @@
   .sw{width:26px;height:26px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform .1s,border-color .1s;flex-shrink:0;}
   .sw:hover{transform:scale(1.18);}
   .sw.on{border-color:var(--black);}
-  .theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-  .th{aspect-ratio:1;border-radius:8px;border:2px solid transparent;cursor:pointer;position:relative;overflow:hidden;transition:transform .1s,border-color .1s;}
-  .th:hover{transform:scale(1.07);}
-  .th.on{border-color:var(--black);}
-  .th em{position:absolute;bottom:2px;left:0;right:0;text-align:center;font-style:normal;font-size:.46rem;font-weight:600;color:rgba(255,255,255,.92);text-shadow:0 1px 3px rgba(0,0,0,.7);}
+  .bg-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+  .bg-thumb{aspect-ratio:1;border-radius:6px;border:2.5px solid transparent;cursor:pointer;background-size:cover;background-position:center;transition:transform .1s,border-color .1s;}
+  .bg-thumb:hover{transform:scale(1.07);}
+  .bg-thumb.on{border-color:var(--black);}
   .fmt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
   .fmt{background:var(--gray-100);border:1.5px solid var(--gray-200);border-radius:8px;padding:.5rem .3rem;text-align:center;cursor:pointer;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:500;color:var(--gray-600);line-height:1.5;transition:all .12s;}
   .fmt b{display:block;font-size:.92rem;font-weight:800;color:var(--black);letter-spacing:-.3px;}
   .fmt:hover{border-color:var(--black);background:var(--white);}
   .fmt.on{background:var(--black);border-color:var(--black);color:#ccc;}
   .fmt.on b{color:#fff;}
+  .wm-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:var(--gray-100);border-radius:8px;margin-top:.3rem;}
+  .wm-row span{font-size:.82rem;font-weight:600;}
+  .toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--gray-200);border-radius:22px;transition:.2s;}
+  .toggle-slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s;}
+  .toggle input:checked+.toggle-slider{background:var(--black);}
+  .toggle input:checked+.toggle-slider:before{transform:translateX(18px);}
   .btn-main{width:100%;margin-top:1.5rem;padding:.9rem;background:var(--black);color:var(--white);border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:.3px;cursor:pointer;transition:opacity .15s;}
   .btn-main:hover{opacity:.82;}
   .btn-main:disabled{opacity:.35;cursor:not-allowed;}
@@ -72,13 +69,13 @@
   .btn-out:hover{border-color:var(--black);}
   .btn-out:disabled{opacity:.35;cursor:not-allowed;}
   .btn-dl{background:var(--black);color:#fff;border-color:var(--black);}
-  .btn-dl:hover{opacity:.82;border-color:var(--black);}
+  .btn-dl:hover{opacity:.82;}
   footer{margin-top:4rem;padding:2rem;text-align:center;font-size:.75rem;color:var(--gray-400);border-top:1px solid var(--gray-200);background:var(--white);}
 </style>
 </head>
 <body>
 <nav>
-  <div class="logo">XTimeLater<span>.com</span></div>
+  <div class="logo">XTimesLater<span>.com</span></div>
   <div class="badge">Free Tool</div>
 </nav>
 <div class="hero">
@@ -110,7 +107,7 @@
     </div>
     <div class="field">
       <span class="field-label">Background</span>
-      <div class="theme-grid" id="tg"></div>
+      <div class="bg-grid" id="bgGrid"></div>
     </div>
     <div class="field">
       <span class="field-label">Video Format</span>
@@ -120,7 +117,17 @@
         <button class="fmt" data-w="1080" data-h="1080"><b>1:1</b>Instagram</button>
         <button class="fmt" data-w="1080" data-h="810"><b>4:3</b>Classic</button>
         <button class="fmt" data-w="810" data-h="1080"><b>3:4</b>Portrait</button>
-        <button class="fmt" data-w="1280" data-h="720"><b>16:9</b>Twitter/X</button>
+        <button class="fmt" data-w="1080" data-h="1350"><b>4:5</b>Instagram+</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="field-label">Watermark</span>
+      <div class="wm-row">
+        <span>Show xtimeslater.com watermark</span>
+        <label class="toggle">
+          <input type="checkbox" id="wmToggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
       </div>
     </div>
     <button class="btn-main" id="genBtn" onclick="gen()">Generate Video</button>
@@ -137,7 +144,7 @@
     </div>
   </div>
 </div>
-<footer>XTimeLater — Not affiliated with Nickelodeon or Viacom</footer>
+<footer>XTimesLater — Not affiliated with Nickelodeon or Viacom</footer>
 <script>
 // SLOT
 const ITEMS=['One Eternity','1 Minute','5 Days','3 Rounds','1 Year','100 Years','1000 Years','One Eternity','5 Seconds','2 Weeks','X Times'];
@@ -161,12 +168,9 @@ function buildSlot(){
     win.style.width=slotW+'px';
     track.style.transition='none';
     track.style.transform='translateY(0)';
-
-    // nudge title left by half the difference between slot width and final item width
-    const finalW = items[items.length-1].getBoundingClientRect().width;
-    const extra = (slotW - finalW) / 2;
-    document.querySelector('.hero-title').style.transform = `translateX(-${extra}px)`;
-
+    const finalW=items[items.length-1].getBoundingClientRect().width;
+    const extra=(slotW-finalW)/2;
+    document.querySelector('.hero-title').style.transform=`translateX(-${extra}px)`;
     setTimeout(()=>runSlot(itemH),800);
   });
 }
@@ -174,8 +178,7 @@ function runSlot(itemH){
   const schedule=[
     {index:1,delay:100},{index:2,delay:100},{index:3,delay:100},
     {index:4,delay:100},{index:5,delay:100},{index:6,delay:100},
-    {index:7,delay:100},{index:8,delay:180},{index:9,delay:320},
-    {index:10,delay:600}
+    {index:7,delay:100},{index:8,delay:180},{index:9,delay:320},{index:10,delay:600}
   ];
   let elapsed=0;
   schedule.forEach((step,i)=>{
@@ -190,29 +193,36 @@ function runSlot(itemH){
 }
 document.fonts.ready.then(buildSlot);
 
-// THEMES
-const THEMES=[
-  {name:'Classic',c:['#d4a017','#c8960f','#e8b84b','#b8860b']},
-  {name:'Ocean',c:['#1565c0','#0d47a1','#1976d2','#0a2f6e']},
-  {name:'Purple',c:['#6a1b9a','#4a148c','#7b1fa2','#38006b']},
-  {name:'Green',c:['#2e7d32','#1b5e20','#388e3c','#1a4a1e']},
-  {name:'Coral',c:['#e64a19','#bf360c','#f4511e','#8b2000']},
-  {name:'Pink',c:['#c2185b','#880e4f','#d81b60','#6a0035']},
-  {name:'Teal',c:['#00695c','#004d40','#00796b','#00332c']},
-  {name:'Dark',c:['#212121','#161616','#2c2c2c','#0a0a0a']},
-  {name:'Sand',c:['#f9a825','#f57f17','#fbc02d','#e65100']},
-  {name:'Sky',c:['#0288d1','#01579b','#039be5','#003c6e']},
-];
-let ti=0,W=1920,H=1080,blob=null;
-const tg=document.getElementById('tg');
-THEMES.forEach((t,i)=>{
+// BACKGROUNDS - 18 images
+const BG_COUNT = 18;
+const bgImages = [];
+for(let i=1;i<=BG_COUNT;i++) bgImages.push(`bg${i}.jpeg`);
+
+let currentBg = 0;
+const bgGrid = document.getElementById('bgGrid');
+bgImages.forEach((src,i)=>{
   const el=document.createElement('div');
-  el.className='th'+(i===0?' on':'');
-  el.style.background=`linear-gradient(135deg,${t.c[0]},${t.c[1]})`;
-  el.innerHTML=`<em>${t.name}</em>`;
-  el.onclick=()=>{document.querySelectorAll('.th').forEach(x=>x.classList.remove('on'));el.classList.add('on');ti=i;redraw();};
-  tg.appendChild(el);
+  el.className='bg-thumb'+(i===0?' on':'');
+  el.style.backgroundImage=`url('${src}')`;
+  el.onclick=()=>{
+    document.querySelectorAll('.bg-thumb').forEach(x=>x.classList.remove('on'));
+    el.classList.add('on');
+    currentBg=i;
+    redraw();
+  };
+  bgGrid.appendChild(el);
 });
+
+// Preload all bg images
+const loadedImgs = [];
+bgImages.forEach((src,i)=>{
+  const img=new Image();
+  img.src=src;
+  loadedImgs[i]=img;
+});
+
+let W=1920,H=1080,blob=null;
+
 document.querySelectorAll('.fmt').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.fmt').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');W=+b.dataset.w;H=+b.dataset.h;redraw();
@@ -223,83 +233,78 @@ document.querySelectorAll('.sw').forEach(s=>s.addEventListener('click',()=>{
 }));
 document.getElementById('col').addEventListener('input',redraw);
 document.getElementById('txt').addEventListener('input',redraw);
+document.getElementById('wmToggle').addEventListener('change',redraw);
 
-function tiles(ctx,w,h,colors){
-  const ts=Math.floor(Math.min(w,h)/10);
-  for(let r=0;r<=Math.ceil(h/ts);r++)
-    for(let c=0;c<=Math.ceil(w/ts);c++){
-      ctx.fillStyle=colors[(r+c)%colors.length];
-      ctx.fillRect(c*ts,r*ts,ts-2,ts-2);
-      ctx.fillStyle='rgba(255,255,255,0.05)';
-      ctx.fillRect(c*ts+4,r*ts+4,ts-12,ts-12);
-    }
-}
-
-// FIXED: smart text fitting - shrinks font until everything fits
-function fitText(ctx, text, maxW, maxH) {
-  const words = text.split(' ');
-  let fs = Math.floor(maxH / 3.5); // start size
-  const minFs = Math.floor(maxH / 14); // minimum font size
-
-  while (fs >= minFs) {
-    ctx.font = `bold ${fs}px Bangers, cursive`;
-    // wrap words
-    const lines = [];
-    let cur = '';
-    words.forEach(w => {
-      const test = cur ? cur + ' ' + w : w;
-      if (ctx.measureText(test).width > maxW && cur) { lines.push(cur); cur = w; }
-      else cur = test;
+function fitText(ctx,text,maxW,maxH){
+  const words=text.split(' ');
+  let fs=Math.floor(maxH/3.5);
+  const minFs=Math.floor(maxH/14);
+  while(fs>=minFs){
+    ctx.font=`${fs}px "Some Time Later",Bangers,cursive`;
+    const lines=[];let cur='';
+    words.forEach(w=>{
+      const t=cur?cur+' '+w:w;
+      if(ctx.measureText(t).width>maxW&&cur){lines.push(cur);cur=w;}
+      else cur=t;
     });
-    if (cur) lines.push(cur);
-
-    // check if all lines fit within maxW and total height fits
-    const lh = fs * 1.25;
-    const totalH = lines.length * lh;
-    const allFit = lines.every(l => ctx.measureText(l).width <= maxW);
-
-    if (allFit && totalH <= maxH) {
-      return { lines, fs, lh };
-    }
-    fs -= 2;
+    if(cur)lines.push(cur);
+    const lh=fs*1.25;
+    const totalH=lines.length*lh;
+    const allFit=lines.every(l=>ctx.measureText(l).width<=maxW);
+    if(allFit&&totalH<=maxH)return{lines,fs,lh};
+    fs-=2;
   }
-  // fallback: just return with min size
-  ctx.font = `bold ${minFs}px Bangers, cursive`;
-  const lines = [text];
-  return { lines, fs: minFs, lh: minFs * 1.25 };
+  ctx.font=`${minFs}px "Some Time Later",Bangers,cursive`;
+  return{lines:[text],fs:minFs,lh:minFs*1.25};
 }
 
 function paint(canvas,w,h){
   canvas.width=w;canvas.height=h;
   const ctx=canvas.getContext('2d');
-  tiles(ctx,w,h,THEMES[ti].c);
 
-  const text=document.getElementById('txt').value||'X Time Later...';
+  // Draw background image
+  const img=loadedImgs[currentBg];
+  if(img&&img.complete){
+    // cover fit
+    const scale=Math.max(w/img.naturalWidth,h/img.naturalHeight);
+    const sw=img.naturalWidth*scale;
+    const sh=img.naturalHeight*scale;
+    const sx=(w-sw)/2;
+    const sy=(h-sh)/2;
+    ctx.drawImage(img,sx,sy,sw,sh);
+  } else {
+    ctx.fillStyle='#d4a017';
+    ctx.fillRect(0,0,w,h);
+  }
+
+  const text=document.getElementById('txt').value||'X Times Later...';
   const color=document.getElementById('col').value;
-
-  const padX = w * 0.1;
-  const padY = h * 0.12;
-  const maxW = w - padX * 2;
-  const maxH = h - padY * 2;
-
-  const {lines, fs, lh} = fitText(ctx, text, maxW, maxH);
-
-  const totalH = lines.length * lh;
-  const startY = (h - totalH) / 2 + lh * 0.75;
+  const padX=w*0.1,padY=h*0.12;
+  const maxW=w-padX*2,maxH=h-padY*2;
+  const{lines,fs,lh}=fitText(ctx,text,maxW,maxH);
+  const totalH=lines.length*lh;
+  const startY=(h-totalH)/2+lh*0.75;
 
   ctx.textAlign='center';
   ctx.textBaseline='alphabetic';
-  ctx.font=`bold ${fs}px "Some Time Later", Bangers, cursive`;
+  ctx.font=`${fs}px "Some Time Later",Bangers,cursive`;
 
   lines.forEach((l,i)=>{
     const y=startY+i*lh;
-    ctx.lineWidth=fs*0.09;
-    ctx.strokeStyle='rgba(0,0,0,0.9)';
-    ctx.lineJoin='round';
-    ctx.strokeText(l,w/2,y);
+    // NO outline - just fill
     ctx.fillStyle=color;
     ctx.fillText(l,w/2,y);
   });
+
+  // Watermark
+  if(document.getElementById('wmToggle').checked){
+    const wmSize=Math.floor(w*0.022);
+    ctx.font=`bold ${wmSize}px Inter,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.55)';
+    ctx.textAlign='right';
+    ctx.textBaseline='bottom';
+    ctx.fillText('xtimeslater.com',w-w*0.02,h-h*0.02);
+  }
 }
 
 function redraw(){
@@ -359,12 +364,14 @@ function dl(){
   const ext=blob.type.includes('mp4')?'mp4':'webm';
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`xtimelater_${W}x${H}.${ext}`;
+  a.download=`xtimeslater_${W}x${H}.${ext}`;
   a.click();
 }
 
 function setMsg(m,t=''){const el=document.getElementById('msg');el.textContent=m;el.className=t;}
 
+// Redraw when images load
+loadedImgs.forEach(img=>{ img.onload=redraw; });
 speechSynthesis.onvoiceschanged=redraw;
 redraw();
 </script>
